@@ -1,6 +1,4 @@
 module.exports={
-  //http port
-  httpPort:5000,
   //串口名
   serialPortName:'/dev/tty.usbserial-A906QX95',
   //波特率

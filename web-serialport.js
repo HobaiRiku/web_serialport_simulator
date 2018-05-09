@@ -6,6 +6,16 @@ const open = require('open')
 require('./tool/arrUtil')
 const uuid = require('uuid/v1')
 
+//arguments
+const minimist = require('minimist')
+let  args = minimist(process.argv.slice(2));
+console.log(args)
+if(args.p){
+  config.serialPortName = args.p
+}
+if(args.b){
+  config.baudRate = args.b
+}
 //http server
 const express = require('express');
 const app = express();
@@ -15,6 +25,14 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const bodyParser = require('body-parser');
 
+let info = {
+  httpPort: "",
+  serialPortName: config.serialPortName,
+  baudRate: config.baudRate,
+  dataBits: config.dataBits,
+  parity: config.parity,
+  stopBits: config.stopBits
+}
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json());
 
@@ -23,15 +41,8 @@ app.get('/', (req, res) => {
   const html = fs.readFileSync(path.resolve(__dirname, './vue-page/dist/index.html'), 'utf-8');
   res.send(html);
 })
+
 app.get('/api/info', (req, res) => {
-  let info = {
-    httpPort: config.httpPort,
-    serialPortName: config.serialPortName,
-    baudRate: config.baudRate,
-    dataBits: config.dataBits,
-    parity: config.parity,
-    stopBits: config.stopBits
-  }
   res.json(info)
 })
 
@@ -51,13 +62,14 @@ let serialPort = new SerialPort(
       process.exit(1);
     } else {
       console.log(new Date() + ':' + "打开串口端口" + config.serialPortName + "成功,等待数据发送");
-      http.listen(config.httpPort, function (error) {
+      http.listen(function (error) {
         if(error) {
           console.error(error)
           process.exit(1);
         }
-        console.log(new Date() + ":" + "web服务启动:0.0.0.0:", config.httpPort);
-        if(config_name!=='local') open("http://localhost:" + config.httpPort + '');
+        info.httpPort=http.address().port
+        console.log(new Date() + ":" + "web服务启动:0.0.0.0:", http.address().port);
+        if(config_name!=='local') open("http://localhost:" + http.address().port + '');
       });
     }
   });
