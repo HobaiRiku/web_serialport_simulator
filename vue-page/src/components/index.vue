@@ -186,7 +186,7 @@ export default {
           id: Math.random()
             .toString(36)
             .substr(2),
-          data: this.dataSent,
+          data: this.dataSent.toUpperCase(),
           date: new Date()
         };
         this.sentList.unshift(oneLog);

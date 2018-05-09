@@ -9,7 +9,6 @@ const uuid = require('uuid/v1')
 //arguments
 const minimist = require('minimist')
 let  args = minimist(process.argv.slice(2));
-console.log(args)
 if(args.p){
   config.serialPortName = args.p
 }
@@ -62,14 +61,14 @@ let serialPort = new SerialPort(
       process.exit(1);
     } else {
       console.log(new Date() + ':' + "打开串口端口" + config.serialPortName + "成功,等待数据发送");
-      http.listen(function (error) {
+      http.listen(config.httpPort?config.httpPort:0,function (error) {
         if(error) {
           console.error(error)
           process.exit(1);
         }
-        info.httpPort=http.address().port
-        console.log(new Date() + ":" + "web服务启动:0.0.0.0:", http.address().port);
-        if(config_name!=='local') open("http://localhost:" + http.address().port + '');
+        info.httpPort=config.httpPort?config.httpPort:http.address().port
+        console.log(new Date() + ":" + "web服务启动:0.0.0.0:", info.httpPort);
+        if(config_name!=='local') open("http://localhost:" + info.httpPort + '');
       });
     }
   });
@@ -88,11 +87,12 @@ app.post('/api/data',function(req,res){
   try {
     let data = req.body.data.split(' ')
       for(let one of data){
+        if(isHex(one))
           serial_data_arr.push(parseInt(one,16));
+          else throw new Error('sent fail: data must be hex format')
       } 
   } catch (error) {
-    console.error(error)
-     return  res.status(200).json({message:'sent fail: data format error'})
+     return  res.status(200).json({message:error.message})
   }
   let data_send = new Buffer(serial_data_arr)
   serialPort.write(data_send,function (error) {
@@ -111,7 +111,7 @@ app.post('/api/data',function(req,res){
 
 //assist func
 function intToHexString(int_number) {
-    return (int_number).toString(16).length > 1 ? (int_number).toString(16) : '0' + (int_number).toString(16);
+    return (int_number).toString(16).length > 1 ? (int_number).toString(16).toUpperCase() : '0' + (int_number).toString(16).toUpperCase();
 }
 
 function intArrToHexString(arr) {
@@ -122,4 +122,13 @@ function intArrToHexString(arr) {
         result = result + intToHexString(one) + ' ';
     }
     return result;
+}
+function isHex(str){
+  if(typeof(str)!='string') return false
+  for(let char of str){
+    if(char>='0'&&char<='9'||char>='a'&&char<='f'||char>='A'&&char<='F')
+    continue
+    else return false
+  }
+  return true
 }
