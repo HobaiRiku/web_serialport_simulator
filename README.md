@@ -12,7 +12,7 @@ A web serialport assistant
 * Build 
 
   ```Bash
-  npm run i-all
+  npm run i-all && npm run build
   ```
 
 * run
