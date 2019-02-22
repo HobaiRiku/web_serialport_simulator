@@ -35,9 +35,9 @@ let info = {
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json());
 
-app.use('/', express.static(path.resolve(__dirname, './vue-page/dist/')));
+app.use('/', express.static(path.resolve(__dirname, './ui/dist/')));
 app.get('/', (req, res) => {
-  const html = fs.readFileSync(path.resolve(__dirname, './vue-page/dist/index.html'), 'utf-8');
+  const html = fs.readFileSync(path.resolve(__dirname, './ui/dist/index.html'), 'utf-8');
   res.send(html);
 })
 
@@ -94,7 +94,7 @@ app.post('/api/data',function(req,res){
   } catch (error) {
      return  res.status(200).json({message:error.message})
   }
-  let data_send = new Buffer(serial_data_arr)
+  let data_send = new Buffer.from(serial_data_arr)
   serialPort.write(data_send,function (error) {
     if (error){
       console.log(new Date() + ':' + '数据发送出错');

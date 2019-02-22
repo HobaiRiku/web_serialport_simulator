@@ -109,7 +109,7 @@
 
 
 <script>
-import io from "../../io/io.js";
+import io from "socket.io-client";
 import * as api from "../../api";
 export default {
   data() {
